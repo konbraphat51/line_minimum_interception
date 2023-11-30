@@ -3,7 +3,7 @@ from typing import Iterable
 from scipy.optimize import minimize
 from .GeometryExpressions import Vector, Line
 
-def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
+def calculate_minimum_movements(lines: Iterable[Line]) -> dict[str, Vector|list[Vector]]:
     """
     Calculate minimum movements to have all lines intersect 
     
@@ -11,10 +11,13 @@ def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
     and minimize the sum of squares of the movement vector.
     
     :param Iterable[Line] lines: lines to let intersect
-    :return: minimum movements vector of each lines.
-    Each vector is perpendicular to the direction vector of the line.
+    :return: {
+        "intersection_point": one intersection point of all lines(Vector),
+        "movement_vectors": minimum movements vector of each lines.(list[Vector])
+            Each vector is perpendicular to the direction vector of the line.
+    }
     The order is same as the give iteration.
-    :rtype: list[Vector]
+    :rtype: dict[str, Vector|list[Vector]]
     """
     
     #get normal vectors of each lines
@@ -27,15 +30,24 @@ def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
         conditions.extend(_compute_conditions(cnt, lines[cnt], normal_vectors[cnt], cnt+1, lines[cnt+1], normal_vectors[cnt+1]))
     
     # optimize
-    movements = _optimize(len(lines), conditions)
+    parameters = _optimize(len(lines), conditions)
     
     # convert to Vector
     movement_vectors = []
     for line_id in range(len(lines)):
-        movement_vector = normal_vectors[line_id][0] * movements[line_id][0] + normal_vectors[line_id][1] * movements[line_id][1]
+        movement_vector = normal_vectors[line_id][0] * parameters[line_id][1][0] + normal_vectors[line_id][1] * parameters[line_id][1][1]
         movement_vectors.append(movement_vector)
+
+    # get intersection point
+    intersection_point = lines[0].start_position + lines[0].direction * parameters[0][0] + movement_vectors[0]
         
-    return movement_vectors
+    #make result
+    result = {
+        "intersection_point": intersection_point,
+        "movement_vectors": movement_vectors
+    }
+        
+    return result
     
 def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
     """
@@ -149,15 +161,15 @@ def _compute_score(params: list[float]):
         
     return score
 
-def _optimize(line_n: int, conditions: list[float]) -> list[tuple[float, float]]:
+def _optimize(line_n: int, conditions: list[float]) -> list[float, tuple[float, float]]:
     """
     Optimize the parameters.
     
     :param int line_n: number of lines
     :param list[float] conditions: parameters to optimize
-    :return: optimized (movement0, movement1) of each lines.
+    :return: optimized (extension, (movement0, movement1)) of each lines.
     Order responds to the line id.
-    :rtype: list[tuple[float, float]]
+    :rtype: list[float, tuple[float, float]]
     """
     
     # initialize parameters
@@ -171,12 +183,17 @@ def _optimize(line_n: int, conditions: list[float]) -> list[tuple[float, float]]
     result = minimize(_compute_score, parameters, constraints=conditions)
     
     # clean results
-    movements = []
+    parameters = []
     for line_id in range(line_n):
         # (movement0, movement1) of each lines
-        movements.append((result.x[_get_movement_param_position(line_id, 0)], result.x[_get_movement_param_position(line_id, 1)]))
+        movements = (result.x[_get_movement_param_position(line_id, 0)], result.x[_get_movement_param_position(line_id, 1)])
+
+        # extension of each lines
+        extension = result.x[_get_extension_param_position(line_id)]
+        
+        parameters.append((extension, movements))
     
-    return movements
+    return parameters
     
 def _get_extension_param_position(id: int) -> int:
     """
