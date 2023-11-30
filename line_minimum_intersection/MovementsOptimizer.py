@@ -27,7 +27,15 @@ def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
         conditions.extend(_compute_conditions(cnt, lines[cnt], normal_vectors[cnt], cnt+1, lines[cnt+1], normal_vectors[cnt+1]))
     
     # optimize
+    movements = _optimize(len(lines), conditions)
     
+    # convert to Vector
+    movement_vectors = []
+    for line_id in range(len(lines)):
+        movement_vector = normal_vectors[line_id][0] * movements[line_id][0] + normal_vectors[line_id][1] * movements[line_id][1]
+        movement_vectors.append(movement_vector)
+        
+    return movement_vectors
     
 def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
     """
