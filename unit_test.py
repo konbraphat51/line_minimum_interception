@@ -8,5 +8,9 @@ lines.append(Line(Vector(1, 1, 1), Vector(0, 0, -1)))
 
 movement_vectors = calculate_minimum_movements(lines)
 
-for vector in movement_vectors:
+print("intersection point:")
+print(movement_vectors["intersection_point"])
+
+print("movement vectors:")
+for vector in movement_vectors["movement_vectors"]:
     print(vector)
