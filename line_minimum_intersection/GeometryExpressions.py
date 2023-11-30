@@ -3,9 +3,7 @@ Module for prepare classes for geometry expressions
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
 
-@dataclass
 class Vector:
     """
     3D Vector
@@ -49,6 +47,12 @@ class Vector:
             return self.z
         else:
             raise IndexError("Vector index out of range")
+        
+    def __str__(self) -> str:
+        """
+        for getting string expression when debug
+        """
+        return f"({self.x}, {self.y}, {self.z})"
  
     def calculate_length(self) -> float:
         """
@@ -90,7 +94,6 @@ class Vector:
             vector0.x * vector1.y - vector0.y * vector1.x
         )
     
-@dataclass
 class Line:
     """
     Line in 3D space
