@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Iterable
+from scipy.optimize import minimize
 from .GeometryExpressions import Vector, Line
 
 def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
@@ -25,6 +26,7 @@ def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
         # for each pair of lines: former and the next
         conditions.extend(_compute_conditions(cnt, lines[cnt], normal_vectors[cnt], cnt+1, lines[cnt+1], normal_vectors[cnt+1]))
     
+    # optimize
     
     
 def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
@@ -52,7 +54,7 @@ def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
     
     return (first, second)
 
-def _compute_conditions(id0: int, line0: Line, normals0: tuple[Vector, Vector], id1:int, line1:Line, normals1: tuple[Vector, Vector]) -> list[callable[dict, float]]:
+def _compute_conditions(id0: int, line0: Line, normals0: tuple[Vector, Vector], id1:int, line1:Line, normals1: tuple[Vector, Vector]) -> list[dict]:
     """
     Set intersection conditions between two lines.
     
@@ -69,9 +71,9 @@ def _compute_conditions(id0: int, line0: Line, normals0: tuple[Vector, Vector], 
     :param int id1: id of the second line. This is used for naming parameters
     :param Line line1: second line to intersect
     :param tuple[Vector, Vector] normals1: normal vectors of the second line
-    :return: 3 function that returns the value of the condition of xyz,
+    :return: 3 conditions that returns the value of the condition of xyz,
     the parameter of this function using the naming functions
-    :rtype: list[callable[dict, float]]
+    :rtype: list[dict]
     """
     
     conditions = []
@@ -82,7 +84,7 @@ def _compute_conditions(id0: int, line0: Line, normals0: tuple[Vector, Vector], 
     
     return conditions
     
-def _compute_condition(component_id: int, id0: int, line0: Line, normals0: tuple[Vector, Vector], id1:int, line1:Line, normals1: tuple[Vector, Vector]) -> callable[dict, float]:
+def _compute_condition(component_id: int, id0: int, line0: Line, normals0: tuple[Vector, Vector], id1:int, line1:Line, normals1: tuple[Vector, Vector]) -> dict:
     """
     Set intersection conditions between two lines for single component.
     
@@ -95,19 +97,43 @@ def _compute_condition(component_id: int, id0: int, line0: Line, normals0: tuple
     :param int id1: id of the second line. This is used for naming parameters
     :param Line line1: second line to intersect
     :param tuple[Vector, Vector] normals1: normal vectors of the second line
-    :return: function that returns the value of the condition,
+    :return: condition that returns the value of the condition,
     the parameter of this function using the naming functions
     :rtype: callable[dict, float]
     """
     
-    return lambda params: ((line0.start_position[component_id] 
+    return {
+        "type": "eq",
+        "fun": lambda params: ((line0.start_position[component_id] 
                            + line0.direction[component_id]  * params[_get_extension_param_name(id0)] 
                            + normals0[0][component_id] * params[_get_movement_param_name(id0, 0)] 
                            + normals0[1][component_id] * params[_get_movement_param_name(id0, 1)]) 
-    - (line1.start_position[component_id] 
-        + line1.direction[component_id]  * params[_get_extension_param_name(id1)] 
-        + normals1[0][component_id] * params[_get_movement_param_name(id1, 0)] 
-        + normals1[1][component_id] * params[_get_movement_param_name(id1, 1)]))
+        - (line1.start_position[component_id] 
+            + line1.direction[component_id]  * params[_get_extension_param_name(id1)] 
+            + normals1[0][component_id] * params[_get_movement_param_name(id1, 0)] 
+            + normals1[1][component_id] * params[_get_movement_param_name(id1, 1)]))
+    }
+    
+def _compute_score(params: dict):
+    """
+    Compute the score of the parameters.
+    
+    This is sum of squares of the movement vectors.
+    
+    :param dict params: parameters
+    :return: score
+    :rtype: float
+    """
+    
+    # square of the movement vector length
+    score = 0
+    for key in params.keys():
+        # the normal vector is normalized, 
+        #   so the movement parameter is the length of the movement vector
+        if key.startswith("movement"):
+            score += params[key] ** 2
+    return score
+
     
 def _get_extension_param_name(id: int) -> str:
     """
