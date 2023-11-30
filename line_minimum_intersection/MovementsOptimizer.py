@@ -19,14 +19,15 @@ def calculate_minimum_movements(lines: Iterable[Line]) -> list[Vector]:
     #get normal vectors of each lines
     normal_vectors = [_find_normal_vectors(line.direction) for line in lines]
     
+    
+    
 def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
     """
     Find a pair of normal vectors of the given vector.
     
-    The pair is perpendicular to each other.
-    
     :param Vector vector: vector to find normal vectors
-    :return: pair of normal vectors
+    :return: pair of normal vectors.
+    The pair is perpendicular to each other, and normalized.
     :rtype: tuple[Vector]
     """
     
@@ -37,10 +38,10 @@ def _find_normal_vectors(vector: Vector) -> tuple[Vector]:
         dummy = Vector(0, 1, 0)
     else:
         dummy = Vector(1, 0, 0)
-    first = Vector.calculate_cross(vector, dummy)
+    first = Vector.calculate_cross(vector, dummy).calculate_normalized()
     
     # second of the pair
     # this must be perpendicular to the first vector and the given vector
-    second = Vector.calculate_cross(first, vector)
+    second = Vector.calculate_cross(first, vector).calculate_normalized()
     
     return (first, second)
