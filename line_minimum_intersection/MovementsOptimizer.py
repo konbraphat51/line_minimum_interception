@@ -134,6 +134,34 @@ def _compute_score(params: dict):
             score += params[key] ** 2
     return score
 
+def _optimize(line_n: int, conditions: list[dict]) -> list[tuple[float, float]]:
+    """
+    Optimize the parameters.
+    
+    :param int line_n: number of lines
+    :param list[dict] conditions: conditions to optimize
+    :return: optimized (movement0, movement1) of each lines.
+    Order responds to the line id.
+    :rtype: list[tuple[float, float]]
+    """
+    
+    # initialize parameters
+    parameters = {}
+    for line_id in range(line_n):
+        parameters[_get_extension_param_name(line_id)] = 0
+        for normal_id in range(2):
+            parameters[_get_movement_param_name(line_id, normal_id)] = 0
+    
+    # optimize
+    result = minimize(_compute_score, parameters, constraints=conditions)
+    
+    # clean results
+    movements = []
+    for line_id in range(line_n):
+        # (movement0, movement1) of each lines
+        movements.append((result[_get_movement_param_name(line_id, 0)], result[_get_movement_param_name(line_id, 1)]))
+    
+    return movements
     
 def _get_extension_param_name(id: int) -> str:
     """
