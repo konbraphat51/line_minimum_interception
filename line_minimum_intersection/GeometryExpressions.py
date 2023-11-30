@@ -3,7 +3,9 @@ Module for prepare classes for geometry expressions
 """
 
 from __future__ import annotations
+from dataclasses import dataclass
 
+@dataclass
 class Vector:
     """
     3D Vector
@@ -88,6 +90,7 @@ class Vector:
             vector0.x * vector1.y - vector0.y * vector1.x
         )
     
+@dataclass
 class Line:
     """
     Line in 3D space
