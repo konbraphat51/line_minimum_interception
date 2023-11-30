@@ -37,6 +37,16 @@ class Vector:
     
     def __div__(self, sc: float) -> Vector:
         return Vector(self.x / sc, self.y / sc, self.z / sc)
+    
+    def __getitem__(self, index: int) -> float:
+        if index == 0:
+            return self.x
+        elif index == 1:
+            return self.y
+        elif index == 2:
+            return self.z
+        else:
+            raise IndexError("Vector index out of range")
  
     def calculate_length(self) -> float:
         """
