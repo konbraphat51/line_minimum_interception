@@ -37,7 +37,7 @@ class Vector:
     def __rmul__(self, sc: float) -> Vector:
         return self * sc
     
-    def __div__(self, sc: float) -> Vector:
+    def __truediv__(self, sc: float) -> Vector:
         return Vector(self.x / sc, self.y / sc, self.z / sc)
     
     def __getitem__(self, index: int) -> float:
