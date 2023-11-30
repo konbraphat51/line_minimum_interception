@@ -60,6 +60,24 @@ class Vector:
         
         return self / self.calculate_length()
     
+    def calculate_cross(vector0: Vector, vector1: Vector) -> Vector:
+        """
+        Calculate cross product of two vectors
+        
+        This is static function
+        
+        :param Vector vector0: vector0
+        :param Vector vector1: vector1
+        :return: cross product of two vectors
+        :rtype: Vector
+        """
+            
+        return Vector(
+            vector0.y * vector1.z - vector0.z * vector1.y,
+            vector0.z * vector1.x - vector0.x * vector1.z,
+            vector0.x * vector1.y - vector0.y * vector1.x
+        )
+    
 class Line:
     """
     Line in 3D space
