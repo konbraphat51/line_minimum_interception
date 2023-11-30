@@ -113,52 +113,59 @@ def _compute_condition(component_id: int, id0: int, line0: Line, normals0: tuple
     return {
         "type": "eq",
         "fun": lambda params: ((line0.start_position[component_id] 
-                           + line0.direction[component_id]  * params[_get_extension_param_name(id0)] 
-                           + normals0[0][component_id] * params[_get_movement_param_name(id0, 0)] 
-                           + normals0[1][component_id] * params[_get_movement_param_name(id0, 1)]) 
+                           + line0.direction[component_id]  * params[_get_extension_param_position(id0)] 
+                           + normals0[0][component_id] * params[_get_movement_param_position(id0, 0)] 
+                           + normals0[1][component_id] * params[_get_movement_param_position(id0, 1)]) 
         - (line1.start_position[component_id] 
-            + line1.direction[component_id]  * params[_get_extension_param_name(id1)] 
-            + normals1[0][component_id] * params[_get_movement_param_name(id1, 0)] 
-            + normals1[1][component_id] * params[_get_movement_param_name(id1, 1)]))
+            + line1.direction[component_id]  * params[_get_extension_param_position(id1)] 
+            + normals1[0][component_id] * params[_get_movement_param_position(id1, 0)] 
+            + normals1[1][component_id] * params[_get_movement_param_position(id1, 1)]))
     }
     
-def _compute_score(params: dict):
+def _compute_score(params: list[float]):
     """
     Compute the score of the parameters.
     
     This is sum of squares of the movement vectors.
     
-    :param dict params: parameters
+    :param list[float] params: parameters
     :return: score
     :rtype: float
     """
     
     # square of the movement vector length
     score = 0
-    for key in params.keys():
-        # the normal vector is normalized, 
-        #   so the movement parameter is the length of the movement vector
-        if key.startswith("movement"):
-            score += params[key] ** 2
+    for cnt in range(len(params)):
+        # HACK: this is not adaptive
+        index0 = _get_movement_param_position(cnt, 0)
+        if index0 >= len(params):
+            break
+        score += params[index0] ** 2
+        
+        index1 = _get_movement_param_position(cnt, 1)
+        if index1 >= len(params):
+            break
+        score += params[index1] ** 2
+        
     return score
 
-def _optimize(line_n: int, conditions: list[dict]) -> list[tuple[float, float]]:
+def _optimize(line_n: int, conditions: list[float]) -> list[tuple[float, float]]:
     """
     Optimize the parameters.
     
     :param int line_n: number of lines
-    :param list[dict] conditions: conditions to optimize
+    :param list[float] conditions: parameters to optimize
     :return: optimized (movement0, movement1) of each lines.
     Order responds to the line id.
     :rtype: list[tuple[float, float]]
     """
     
     # initialize parameters
-    parameters = {}
+    parameters = [0] * (max(_get_extension_param_position(line_n-1), _get_movement_param_position(line_n-1, 1))+1)
     for line_id in range(line_n):
-        parameters[_get_extension_param_name(line_id)] = 0
+        parameters[_get_extension_param_position(line_id)] = 0
         for normal_id in range(2):
-            parameters[_get_movement_param_name(line_id, normal_id)] = 0
+            parameters[_get_movement_param_position(line_id, normal_id)] = 0
     
     # optimize
     result = minimize(_compute_score, parameters, constraints=conditions)
@@ -167,27 +174,31 @@ def _optimize(line_n: int, conditions: list[dict]) -> list[tuple[float, float]]:
     movements = []
     for line_id in range(line_n):
         # (movement0, movement1) of each lines
-        movements.append((result[_get_movement_param_name(line_id, 0)], result[_get_movement_param_name(line_id, 1)]))
+        movements.append((result.x[_get_movement_param_position(line_id, 0)], result.x[_get_movement_param_position(line_id, 1)]))
     
     return movements
     
-def _get_extension_param_name(id: int) -> str:
+def _get_extension_param_position(id: int) -> int:
     """
-    Get the name of the parameter that represents the extension of the direction vector.
+    Get the position of the parameter that represents the extension of the direction vector.
+    
+    Posiotion in the parameters list.
     
     :param int id: id of the line
-    :return: name of the parameter
-    :rtype: str
+    :return: position of the parameter
+    :rtype: int
     """
-    return "extension" + str(id)
+    return 3*id
 
-def _get_movement_param_name(id: int, normal_id: int) -> str:
+def _get_movement_param_position(id: int, normal_id: int) -> int:
     """
-    Get the name of the parameter that represents the movement.
+    Get the position of the parameter that represents the movement.
+    
+    Posiotion in the parameters list.
     
     :param int id: id of the line
     :param int normal_id: id of the normal vector
-    :return: name of the parameter
-    :rtype: str
+    :return: position of the parameter
+    :rtype: int
     """
-    return "movement" + str(id) + "_" + str(normal_id)
+    return 3*id + 1 + normal_id
