@@ -42,7 +42,7 @@ def visualize_intersection(
     for line_id in range(line_n):
         _draw_movement_vector(axes, intersection_point, movement_vectors[line_id], color="green")
     
-    
+    plt.show()
     
 def _draw_line(
     axes: Axes3D,
