@@ -29,14 +29,14 @@ def visualize_intersection(
     
     # canvas
     figure = plt.figure()
-    axes = Axes3D(figure)
+    axes = figure.add_subplot(projection='3d')
     
     # draw lines
     for line_id in range(line_n):
         _draw_line(axes, intersection_point, lines[line_id].direction, movement_vectors[line_id], line_length)
         
     # draw intersection point
-    axes.scatter(intersection_point.x, intersection_point.y, intersection_point.z, color="red")
+    axes.scatter([intersection_point.x], [intersection_point.y], [intersection_point.z], color="red")
     
     # draw movement vectors
     for line_id in range(line_n):
@@ -75,7 +75,7 @@ def _draw_line(
         color=color
     )
     axes.quiver(
-        intersection_position.x, intersection_position.y, intersection_position.z,
+        start_position.x, start_position.y, start_position.z,
         -half_way.x, -half_way.y, -half_way.z,
         color=color
     )
