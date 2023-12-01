@@ -39,6 +39,10 @@ def visualize_intersection(
     axes.scatter(intersection_point.x, intersection_point.y, intersection_point.z, color="red")
     
     # draw movement vectors
+    for line_id in range(line_n):
+        _draw_movement_vector(axes, intersection_point, movement_vectors[line_id], color="green")
+    
+    
     
 def _draw_line(
     axes: Axes3D,
@@ -73,5 +77,28 @@ def _draw_line(
     axes.quiver(
         intersection_position.x, intersection_position.y, intersection_position.z,
         -half_way.x, -half_way.y, -half_way.z,
+        color=color
+    )
+    
+def _draw_movement_vector(
+    axes: Axes3D,
+    intersection_position: Vector,
+    movement_vector: Vector,
+    color: str = "green"
+) -> None:
+    """
+    Draw a movement vector
+    
+    :param Axes3D axes: axes to draw
+    :param Vector intersection_position: intersection position
+    :param Vector movement_vector: movement vector
+    :param str color: color of line
+    :rtype: None
+    """
+    
+    axes.quiver(
+        intersection_position.x, intersection_position.y, intersection_position.z,
+        movement_vector.x, movement_vector.y, movement_vector.z,
+        pivot="tip",
         color=color
     )
