@@ -33,7 +33,7 @@ def visualize_intersection(
     
     # draw lines
     for line_id in range(line_n):
-        _draw_line(axes, lines[line_id], intersection_point, movement_vectors[line_id], line_length)
+        _draw_line(axes, intersection_point, lines[line_id].direction, movement_vectors[line_id], line_length)
         
     # draw intersection point
     axes.scatter(intersection_point.x, intersection_point.y, intersection_point.z, color="red")
