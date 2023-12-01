@@ -1,6 +1,11 @@
-#unit-test calculate_minimum_movements()
+# unit-test calculate_minimum_movements()
 
-from line_minimum_intersection import Vector, Line, calculate_minimum_movements, visualize_intersection
+from line_minimum_intersection import (
+    Vector,
+    Line,
+    calculate_minimum_movements,
+    visualize_intersection,
+)
 
 lines = []
 lines.append(Line(Vector(0, 0, 0), Vector(1, 0, 0)))
@@ -14,5 +19,9 @@ print(movement_vectors["intersection_point"])
 print("movement vectors:")
 for vector in movement_vectors["movement_vectors"]:
     print(vector)
-    
-visualize_intersection(lines, movement_vectors["intersection_point"], movement_vectors["movement_vectors"])
+
+visualize_intersection(
+    lines,
+    movement_vectors["intersection_point"],
+    movement_vectors["movement_vectors"],
+)
