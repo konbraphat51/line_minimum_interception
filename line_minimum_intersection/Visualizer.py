@@ -67,18 +67,26 @@ def _draw_line(
     #draw from here
     start_position = intersection_position - movement_vector
     
-    # draw 2 vectors
-    half_way = direction.calculate_normalized() * line_length / 2
-    axes.quiver(
-        start_position.x, start_position.y, start_position.z,
-        half_way.x, half_way.y, half_way.z,
-        color=color
-    )
-    axes.quiver(
-        start_position.x, start_position.y, start_position.z,
-        -half_way.x, -half_way.y, -half_way.z,
-        color=color
-    )
+    # make on-line points
+    x = []
+    y = []
+    z = []
+    extension = 0.0
+    while(extension <= line_length):
+        # plus direction
+        x.append(start_position.x + direction.x * extension)
+        y.append(start_position.y + direction.y * extension)
+        z.append(start_position.z + direction.z * extension)
+        
+        # minus direction
+        x.append(start_position.x - direction.x * extension)
+        y.append(start_position.y - direction.y * extension)
+        z.append(start_position.z - direction.z * extension)
+        
+        extension += 0.25
+            
+    # draw 1 line
+    axes.plot(x, y, z, color=color)
     
 def _draw_movement_vector(
     axes: Axes3D,
