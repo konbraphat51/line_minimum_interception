@@ -41,6 +41,11 @@ def visualize_intersection(
     # draw movement vectors
     for line_id in range(line_n):
         _draw_movement_vector(axes, intersection_point, movement_vectors[line_id], color="green")
+        
+    # label
+    axes.set_xlabel("x")
+    axes.set_ylabel("y")
+    axes.set_zlabel("z")
     
     plt.show()
     
