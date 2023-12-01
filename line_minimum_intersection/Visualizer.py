@@ -83,7 +83,7 @@ def _draw_line(
         y.append(start_position.y - direction.y * extension)
         z.append(start_position.z - direction.z * extension)
         
-        extension += 0.25
+        extension += line_length / 100.0
             
     # draw 1 line
     axes.plot(x, y, z, color=color)
