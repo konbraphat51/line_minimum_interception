@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="line_minimum_interception",
@@ -8,7 +8,7 @@ setup(
     long_description="a",
     long_description_content_type="text/markdown",
     author="author_name",
-    packages=["line_minimum_interception"],
+    packages=find_packages(),
     install_requires=["scipy", "matplotlib"],
     entry_points={
         "console_scripts": ["project_name = project_name.__main__:main"]
